@@ -90,7 +90,7 @@ def main() -> int:
                 print(f"    - {error}")
             all_errors.append((spec_path.name, errors))
         else:
-            print(f"  ✓ Valid")
+            print("  ✓ Valid")
 
     print()
     if all_errors:

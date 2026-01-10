@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
 
 
 def main() -> int:
@@ -38,7 +38,7 @@ def main() -> int:
                 policy = yaml.safe_load(f)
 
             validate(instance=policy, schema=schema)
-            print(f"  ✓ Valid")
+            print("  ✓ Valid")
         except ValidationError as e:
             print(f"  ✗ Invalid: {e.message}")
             errors.append((policy_path.name, e.message))
