@@ -13,7 +13,7 @@ class SpecDiffer:
 
     def diff(self, baseline: OpenAPIParser, current: OpenAPIParser) -> list[BreakingChange]:
         """Find breaking changes between baseline and current spec."""
-        changes = []
+        changes: list[BreakingChange] = []
 
         if self.policy.get("breaking_change_detection.enabled", True):
             changes.extend(self._check_removed_operations(baseline, current))
@@ -32,7 +32,7 @@ class SpecDiffer:
         self, baseline: OpenAPIParser, current: OpenAPIParser
     ) -> list[BreakingChange]:
         """Check for removed operations."""
-        changes = []
+        changes: list[BreakingChange] = []
 
         if not self.policy.get(
             "breaking_change_detection.breaking_changes.removed_operation", True
@@ -60,7 +60,7 @@ class SpecDiffer:
         self, baseline: OpenAPIParser, current: OpenAPIParser
     ) -> list[BreakingChange]:
         """Check for removed or renamed parameters."""
-        changes = []
+        changes: list[BreakingChange] = []
 
         if not self.policy.get(
             "breaking_change_detection.breaking_changes.removed_parameter", True
@@ -96,7 +96,7 @@ class SpecDiffer:
         self, baseline: OpenAPIParser, current: OpenAPIParser
     ) -> list[BreakingChange]:
         """Check for breaking response changes."""
-        changes = []
+        changes: list[BreakingChange] = []
 
         baseline_ops = {(p, m): op for p, m, op in baseline.get_operations()}
         current_ops = {(p, m): op for p, m, op in current.get_operations()}
@@ -131,7 +131,7 @@ class SpecDiffer:
         self, baseline: OpenAPIParser, current: OpenAPIParser
     ) -> list[BreakingChange]:
         """Check for breaking schema changes."""
-        changes = []
+        changes: list[BreakingChange] = []
 
         baseline_schemas = baseline.components.get("schemas", {})
         current_schemas = current.components.get("schemas", {})

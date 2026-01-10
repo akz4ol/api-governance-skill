@@ -30,14 +30,14 @@ class RuleEngine:
 
     def evaluate(self, parser: OpenAPIParser) -> list[Finding]:
         """Evaluate all rules against the spec."""
-        findings = []
+        findings: list[Finding] = []
         for rule in self._rules:
             findings.extend(rule(parser))
         return findings
 
     def _check_security(self, parser: OpenAPIParser) -> list[Finding]:
         """Check security requirements."""
-        findings = []
+        findings: list[Finding] = []
         require_security = self.policy.get("security.require_security_by_default", True)
         allow_public = self.policy.get("security.allow_public_endpoints_if.explicitly_marked", True)
         _public_marker = self.policy.get(
@@ -71,7 +71,7 @@ class RuleEngine:
 
     def _check_error_envelope(self, parser: OpenAPIParser) -> list[Finding]:
         """Check for consistent error envelope."""
-        findings = []
+        findings: list[Finding] = []
         require_envelope = self.policy.get("errors.require_standard_error_envelope", True)
         envelope_name = self.policy.get("errors.envelope_name", "Error")
         required_fields = self.policy.get(
@@ -120,7 +120,7 @@ class RuleEngine:
 
     def _check_pagination(self, parser: OpenAPIParser) -> list[Finding]:
         """Check pagination conventions."""
-        findings = []
+        findings: list[Finding] = []
         require_pagination = self.policy.get("pagination.required_for_list_endpoints", True)
         style = self.policy.get("pagination.style", "cursor")
         limit_param = self.policy.get("pagination.request_params.limit", "limit")
@@ -175,7 +175,7 @@ class RuleEngine:
 
     def _check_naming(self, parser: OpenAPIParser) -> list[Finding]:
         """Check naming conventions."""
-        findings = []
+        findings: list[Finding] = []
         prefer_kebab = self.policy.get("api_style.prefer_kebab_case_paths", True)
         discourage_verbs = self.policy.get("api_style.discourage_verbs_in_paths", True)
         severity = Severity[
@@ -229,7 +229,7 @@ class RuleEngine:
 
     def _check_observability(self, parser: OpenAPIParser) -> list[Finding]:
         """Check observability headers."""
-        findings = []
+        findings: list[Finding] = []
         require_request_id = self.policy.get("observability.require_request_id_header", True)
         _header_name = self.policy.get("observability.header_name", "X-Request-Id")  # noqa: F841
         severity = Severity[
@@ -259,7 +259,7 @@ class RuleEngine:
 
     def _check_versioning(self, parser: OpenAPIParser) -> list[Finding]:
         """Check versioning conventions."""
-        findings = []
+        findings: list[Finding] = []
         strategy = self.policy.get("versioning.strategy", "none_or_header")
         url_versioning = self.policy.get("versioning.url_versioning.enabled", False)
         severity = Severity[

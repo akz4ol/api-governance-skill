@@ -1,7 +1,7 @@
 """OpenAPI spec parser."""
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -47,6 +47,8 @@ class OpenAPIParser:
         except Exception as e:
             raise OpenAPIParseError(f"Failed to parse {self.spec_path}: {e}") from e
 
+        if self._spec is None:
+            raise OpenAPIParseError(f"Failed to parse {self.spec_path}: empty or invalid content")
         return self._spec
 
     @property
@@ -54,32 +56,33 @@ class OpenAPIParser:
         """Get parsed spec."""
         if self._spec is None:
             self.parse()
+        assert self._spec is not None
         return self._spec
 
     @property
     def version(self) -> str:
         """Get OpenAPI version."""
-        return self.spec.get("openapi", self.spec.get("swagger", "unknown"))
+        return cast(str, self.spec.get("openapi", self.spec.get("swagger", "unknown")))
 
     @property
     def info(self) -> dict[str, Any]:
         """Get API info."""
-        return self.spec.get("info", {})
+        return cast(dict[str, Any], self.spec.get("info", {}))
 
     @property
     def paths(self) -> dict[str, Any]:
         """Get API paths."""
-        return self.spec.get("paths", {})
+        return cast(dict[str, Any], self.spec.get("paths", {}))
 
     @property
     def components(self) -> dict[str, Any]:
         """Get components/definitions."""
-        return self.spec.get("components", self.spec.get("definitions", {}))
+        return cast(dict[str, Any], self.spec.get("components", self.spec.get("definitions", {})))
 
     @property
     def security(self) -> list[dict[str, Any]]:
         """Get global security requirements."""
-        return self.spec.get("security", [])
+        return cast(list[dict[str, Any]], self.spec.get("security", []))
 
     def get_operations(self) -> list[tuple[str, str, dict[str, Any]]]:
         """Get all operations as (path, method, operation) tuples."""
@@ -108,7 +111,7 @@ class OpenAPIParser:
         """Validate all internal references are resolvable."""
         errors = []
 
-        def check_refs(obj: Any, path: str = ""):
+        def check_refs(obj: Any, path: str = "") -> None:
             if isinstance(obj, dict):
                 if "$ref" in obj:
                     ref = obj["$ref"]
