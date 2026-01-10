@@ -7,6 +7,7 @@ from typing import Any
 
 class Severity(Enum):
     """Finding severity levels."""
+
     BLOCKER = "BLOCKER"
     MAJOR = "MAJOR"
     MINOR = "MINOR"
@@ -16,6 +17,7 @@ class Severity(Enum):
 @dataclass
 class Finding:
     """A governance finding."""
+
     rule_id: str
     severity: Severity
     message: str
@@ -38,6 +40,7 @@ class Finding:
 @dataclass
 class BreakingChange:
     """A breaking change between spec versions."""
+
     change_type: str
     path: str
     description: str
@@ -58,6 +61,7 @@ class BreakingChange:
 @dataclass
 class GovernanceResult:
     """Result of governance analysis."""
+
     spec_path: str
     policy_name: str
     status: str  # PASS, WARN, FAIL
@@ -100,6 +104,7 @@ class GovernanceResult:
 @dataclass
 class PolicyConfig:
     """Policy configuration."""
+
     name: str
     version: str
     config: dict[str, Any]

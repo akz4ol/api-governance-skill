@@ -75,9 +75,9 @@ def main() -> int:
         else:
             artifacts = governor.generate_artifacts(result)
 
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"API Governance Result: {result.status}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             print(f"Policy: {result.policy_name}")
             print(f"Spec: {result.spec_path}")
             print()

@@ -1,9 +1,8 @@
 """Output artifact generators."""
 
 from pathlib import Path
-from typing import Any
 
-from .models import GovernanceResult, Severity, PolicyConfig
+from .models import GovernanceResult, PolicyConfig, Severity
 
 
 class OutputGenerator:
@@ -92,7 +91,7 @@ class OutputGenerator:
             "",
         ]
 
-        breaking = [bc for bc in self.result.breaking_changes]
+        breaking = list(self.result.breaking_changes)
 
         lines.append("## Breaking Changes")
         if breaking:
@@ -122,7 +121,7 @@ class OutputGenerator:
             "# Deprecation & Migration Plan",
             "",
             "## Overview",
-            f"Breaking changes detected requiring migration planning.",
+            "Breaking changes detected requiring migration planning.",
             "",
             "## Breaking Changes Summary",
         ]

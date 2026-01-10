@@ -1,8 +1,8 @@
 """Governance rule engine."""
 
-from typing import Any, Callable
+from collections.abc import Callable
 
-from .models import Finding, Severity, PolicyConfig
+from .models import Finding, PolicyConfig, Severity
 from .parser import OpenAPIParser
 
 
@@ -17,14 +17,16 @@ class RuleEngine:
 
     def _register_default_rules(self) -> None:
         """Register default governance rules."""
-        self._rules.extend([
-            self._check_security,
-            self._check_error_envelope,
-            self._check_pagination,
-            self._check_naming,
-            self._check_observability,
-            self._check_versioning,
-        ])
+        self._rules.extend(
+            [
+                self._check_security,
+                self._check_error_envelope,
+                self._check_pagination,
+                self._check_naming,
+                self._check_observability,
+                self._check_versioning,
+            ]
+        )
 
     def evaluate(self, parser: OpenAPIParser) -> list[Finding]:
         """Evaluate all rules against the spec."""
@@ -38,8 +40,12 @@ class RuleEngine:
         findings = []
         require_security = self.policy.get("security.require_security_by_default", True)
         allow_public = self.policy.get("security.allow_public_endpoints_if.explicitly_marked", True)
-        public_marker = self.policy.get("security.allow_public_endpoints_if.marker", "x-public: true")
-        severity = Severity[self.policy.get("enforcement.default_severity.security_missing", "MAJOR")]
+        _public_marker = self.policy.get(
+            "security.allow_public_endpoints_if.marker", "x-public: true"
+        )  # noqa: F841
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.security_missing", "MAJOR")
+        ]
 
         if not require_security:
             return findings
@@ -51,13 +57,15 @@ class RuleEngine:
             is_public = operation.get("x-public", False)
 
             if not op_security and not (allow_public and is_public):
-                findings.append(Finding(
-                    rule_id="SEC001",
-                    severity=severity,
-                    message=f"Missing security requirement on {method.upper()} {path}",
-                    path=f"paths.{path}.{method}",
-                    recommendation="Add security requirement or mark as public with x-public: true",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="SEC001",
+                        severity=severity,
+                        message=f"Missing security requirement on {method.upper()} {path}",
+                        path=f"paths.{path}.{method}",
+                        recommendation="Add security requirement or mark as public with x-public: true",
+                    )
+                )
 
         return findings
 
@@ -66,8 +74,12 @@ class RuleEngine:
         findings = []
         require_envelope = self.policy.get("errors.require_standard_error_envelope", True)
         envelope_name = self.policy.get("errors.envelope_name", "Error")
-        required_fields = self.policy.get("errors.problem_fields_required", ["code", "message", "requestId"])
-        severity = Severity[self.policy.get("enforcement.default_severity.error_model_inconsistent", "MAJOR")]
+        required_fields = self.policy.get(
+            "errors.problem_fields_required", ["code", "message", "requestId"]
+        )
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.error_model_inconsistent", "MAJOR")
+        ]
 
         if not require_envelope:
             return findings
@@ -77,28 +89,32 @@ class RuleEngine:
         error_schema = schemas.get(envelope_name)
 
         if not error_schema:
-            findings.append(Finding(
-                rule_id="ERR001",
-                severity=severity,
-                message=f"Missing standard error schema '{envelope_name}'",
-                path="components.schemas",
-                recommendation=f"Add {envelope_name} schema with fields: {', '.join(required_fields)}",
-            ))
+            findings.append(
+                Finding(
+                    rule_id="ERR001",
+                    severity=severity,
+                    message=f"Missing standard error schema '{envelope_name}'",
+                    path="components.schemas",
+                    recommendation=f"Add {envelope_name} schema with fields: {', '.join(required_fields)}",
+                )
+            )
             return findings
 
         # Check required fields
         schema_props = error_schema.get("properties", {})
-        schema_required = error_schema.get("required", [])
+        _schema_required = error_schema.get("required", [])  # noqa: F841
 
         for field in required_fields:
             if field not in schema_props:
-                findings.append(Finding(
-                    rule_id="ERR002",
-                    severity=severity,
-                    message=f"Error schema missing field: {field}",
-                    path=f"components.schemas.{envelope_name}",
-                    recommendation=f"Add '{field}' property to {envelope_name} schema",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="ERR002",
+                        severity=severity,
+                        message=f"Error schema missing field: {field}",
+                        path=f"components.schemas.{envelope_name}",
+                        recommendation=f"Add '{field}' property to {envelope_name} schema",
+                    )
+                )
 
         return findings
 
@@ -109,9 +125,11 @@ class RuleEngine:
         style = self.policy.get("pagination.style", "cursor")
         limit_param = self.policy.get("pagination.request_params.limit", "limit")
         cursor_param = self.policy.get("pagination.request_params.cursor", "cursor")
-        items_field = self.policy.get("pagination.response_shape.items", "items")
-        next_cursor_field = self.policy.get("pagination.response_shape.nextCursor", "nextCursor")
-        severity = Severity[self.policy.get("enforcement.default_severity.pagination_inconsistent", "MAJOR")]
+        _items_field = self.policy.get("pagination.response_shape.items", "items")  # noqa: F841
+        _next_cursor_field = self.policy.get("pagination.response_shape.nextCursor", "nextCursor")  # noqa: F841
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.pagination_inconsistent", "MAJOR")
+        ]
 
         if not require_pagination:
             return findings
@@ -132,22 +150,26 @@ class RuleEngine:
             has_cursor = cursor_param in params
 
             if not has_limit:
-                findings.append(Finding(
-                    rule_id="PAG001",
-                    severity=severity,
-                    message=f"List endpoint missing '{limit_param}' parameter: {method.upper()} {path}",
-                    path=f"paths.{path}.{method}.parameters",
-                    recommendation=f"Add '{limit_param}' query parameter for pagination",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="PAG001",
+                        severity=severity,
+                        message=f"List endpoint missing '{limit_param}' parameter: {method.upper()} {path}",
+                        path=f"paths.{path}.{method}.parameters",
+                        recommendation=f"Add '{limit_param}' query parameter for pagination",
+                    )
+                )
 
             if style == "cursor" and not has_cursor:
-                findings.append(Finding(
-                    rule_id="PAG002",
-                    severity=severity,
-                    message=f"List endpoint missing '{cursor_param}' parameter: {method.upper()} {path}",
-                    path=f"paths.{path}.{method}.parameters",
-                    recommendation=f"Add '{cursor_param}' query parameter for cursor pagination",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="PAG002",
+                        severity=severity,
+                        message=f"List endpoint missing '{cursor_param}' parameter: {method.upper()} {path}",
+                        path=f"paths.{path}.{method}.parameters",
+                        recommendation=f"Add '{cursor_param}' query parameter for cursor pagination",
+                    )
+                )
 
         return findings
 
@@ -156,7 +178,9 @@ class RuleEngine:
         findings = []
         prefer_kebab = self.policy.get("api_style.prefer_kebab_case_paths", True)
         discourage_verbs = self.policy.get("api_style.discourage_verbs_in_paths", True)
-        severity = Severity[self.policy.get("enforcement.default_severity.naming_inconsistent", "MINOR")]
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.naming_inconsistent", "MINOR")
+        ]
 
         verb_patterns = ["get", "create", "update", "delete", "fetch", "list", "add", "remove"]
 
@@ -168,13 +192,15 @@ class RuleEngine:
                     if "{" in segment:
                         continue
                     if "_" in segment or (segment != segment.lower()):
-                        findings.append(Finding(
-                            rule_id="NAM001",
-                            severity=severity,
-                            message=f"Path segment not in kebab-case: '{segment}' in {path}",
-                            path=f"paths.{path}",
-                            recommendation="Use kebab-case for path segments (lowercase with hyphens)",
-                        ))
+                        findings.append(
+                            Finding(
+                                rule_id="NAM001",
+                                severity=severity,
+                                message=f"Path segment not in kebab-case: '{segment}' in {path}",
+                                path=f"paths.{path}",
+                                recommendation="Use kebab-case for path segments (lowercase with hyphens)",
+                            )
+                        )
 
             # Check for verbs in paths
             if discourage_verbs:
@@ -183,14 +209,20 @@ class RuleEngine:
                     if "{" in segment:
                         continue
                     for verb in verb_patterns:
-                        if segment == verb or segment.startswith(f"{verb}-") or segment.endswith(f"-{verb}"):
-                            findings.append(Finding(
-                                rule_id="NAM002",
-                                severity=severity,
-                                message=f"Verb in path segment: '{segment}' in {path}",
-                                path=f"paths.{path}",
-                                recommendation="Use nouns for resources; HTTP methods convey the action",
-                            ))
+                        if (
+                            segment == verb
+                            or segment.startswith(f"{verb}-")
+                            or segment.endswith(f"-{verb}")
+                        ):
+                            findings.append(
+                                Finding(
+                                    rule_id="NAM002",
+                                    severity=severity,
+                                    message=f"Verb in path segment: '{segment}' in {path}",
+                                    path=f"paths.{path}",
+                                    recommendation="Use nouns for resources; HTTP methods convey the action",
+                                )
+                            )
                             break
 
         return findings
@@ -199,8 +231,10 @@ class RuleEngine:
         """Check observability headers."""
         findings = []
         require_request_id = self.policy.get("observability.require_request_id_header", True)
-        header_name = self.policy.get("observability.header_name", "X-Request-Id")
-        severity = Severity[self.policy.get("enforcement.default_severity.observability_missing", "MINOR")]
+        _header_name = self.policy.get("observability.header_name", "X-Request-Id")  # noqa: F841
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.observability_missing", "MINOR")
+        ]
 
         if not require_request_id:
             return findings
@@ -211,13 +245,15 @@ class RuleEngine:
         error_props = error_schema.get("properties", {})
 
         if "requestId" not in error_props:
-            findings.append(Finding(
-                rule_id="OBS001",
-                severity=severity,
-                message="Error schema missing 'requestId' field for observability",
-                path="components.schemas.Error.properties",
-                recommendation="Add 'requestId' field to Error schema for request tracing",
-            ))
+            findings.append(
+                Finding(
+                    rule_id="OBS001",
+                    severity=severity,
+                    message="Error schema missing 'requestId' field for observability",
+                    path="components.schemas.Error.properties",
+                    recommendation="Add 'requestId' field to Error schema for request tracing",
+                )
+            )
 
         return findings
 
@@ -226,21 +262,23 @@ class RuleEngine:
         findings = []
         strategy = self.policy.get("versioning.strategy", "none_or_header")
         url_versioning = self.policy.get("versioning.url_versioning.enabled", False)
-        severity = Severity[self.policy.get("enforcement.default_severity.versioning_inconsistent", "MINOR")]
+        severity = Severity[
+            self.policy.get("enforcement.default_severity.versioning_inconsistent", "MINOR")
+        ]
 
         if strategy == "url" and url_versioning:
             prefix = self.policy.get("versioning.url_versioning.prefix", "/v{major}")
             # Check if paths have version prefix
-            has_versioned_paths = any(
-                p.startswith("/v") for p in parser.paths.keys()
-            )
+            has_versioned_paths = any(p.startswith("/v") for p in parser.paths.keys())
             if not has_versioned_paths:
-                findings.append(Finding(
-                    rule_id="VER001",
-                    severity=severity,
-                    message=f"URL versioning required but no versioned paths found (expected prefix: {prefix})",
-                    path="paths",
-                    recommendation="Add version prefix to paths, e.g., /v1/users",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="VER001",
+                        severity=severity,
+                        message=f"URL versioning required but no versioned paths found (expected prefix: {prefix})",
+                        path="paths",
+                        recommendation="Add version prefix to paths, e.g., /v1/users",
+                    )
+                )
 
         return findings

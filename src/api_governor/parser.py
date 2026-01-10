@@ -8,6 +8,7 @@ import yaml
 
 class OpenAPIParseError(Exception):
     """Error parsing OpenAPI spec."""
+
     pass
 
 
@@ -33,6 +34,7 @@ class OpenAPIParser:
                 self._spec = yaml.safe_load(content)
             elif self.spec_path.suffix == ".json":
                 import json
+
                 self._spec = json.loads(content)
             else:
                 # Try YAML first, then JSON
@@ -40,9 +42,10 @@ class OpenAPIParser:
                     self._spec = yaml.safe_load(content)
                 except yaml.YAMLError:
                     import json
+
                     self._spec = json.loads(content)
         except Exception as e:
-            raise OpenAPIParseError(f"Failed to parse {self.spec_path}: {e}")
+            raise OpenAPIParseError(f"Failed to parse {self.spec_path}: {e}") from e
 
         return self._spec
 

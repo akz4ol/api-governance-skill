@@ -1,9 +1,10 @@
 """Tests for OpenAPI parser."""
 
-import pytest
 from pathlib import Path
 
-from api_governor.parser import OpenAPIParser, OpenAPIParseError
+import pytest
+
+from api_governor.parser import OpenAPIParseError, OpenAPIParser
 
 
 class TestOpenAPIParser:

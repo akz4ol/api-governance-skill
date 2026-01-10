@@ -1,8 +1,6 @@
 """Tests for data models."""
 
-import pytest
-
-from api_governor.models import Finding, Severity, GovernanceResult, BreakingChange
+from api_governor.models import BreakingChange, Finding, GovernanceResult, Severity
 
 
 class TestFinding:

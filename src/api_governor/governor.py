@@ -1,15 +1,14 @@
 """Main API Governor orchestrator."""
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 
-from .models import Finding, Severity, GovernanceResult, PolicyConfig
-from .parser import OpenAPIParser, OpenAPIParseError
-from .rules import RuleEngine
 from .diff import SpecDiffer
+from .models import Finding, GovernanceResult, PolicyConfig, Severity
 from .output import OutputGenerator
+from .parser import OpenAPIParseError, OpenAPIParser
+from .rules import RuleEngine
 
 
 class APIGovernor:
@@ -74,13 +73,15 @@ class APIGovernor:
             self._parser.parse()
             checklist["OpenAPI parseable"] = True
         except OpenAPIParseError as e:
-            findings.append(Finding(
-                rule_id="PARSE001",
-                severity=Severity.BLOCKER,
-                message=f"Failed to parse OpenAPI spec: {e}",
-                path=str(self.spec_path),
-                recommendation="Fix the spec syntax and try again",
-            ))
+            findings.append(
+                Finding(
+                    rule_id="PARSE001",
+                    severity=Severity.BLOCKER,
+                    message=f"Failed to parse OpenAPI spec: {e}",
+                    path=str(self.spec_path),
+                    recommendation="Fix the spec syntax and try again",
+                )
+            )
             return GovernanceResult(
                 spec_path=str(self.spec_path),
                 policy_name=policy.name,
@@ -93,12 +94,14 @@ class APIGovernor:
         ref_errors = self._parser.validate_refs()
         if ref_errors:
             for error in ref_errors:
-                findings.append(Finding(
-                    rule_id="REF001",
-                    severity=Severity.BLOCKER,
-                    message=error,
-                    recommendation="Fix unresolved $ref references",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id="REF001",
+                        severity=Severity.BLOCKER,
+                        message=error,
+                        recommendation="Fix unresolved $ref references",
+                    )
+                )
 
         # Step 3: Apply governance rules
         rule_engine = RuleEngine(policy)
@@ -123,14 +126,18 @@ class APIGovernor:
                 breaking_changes = differ.diff(self._baseline_parser, self._parser)
 
                 # Escalate breaking changes to findings if no deprecation plan
-                escalate = policy.get("breaking_change_detection.escalate_to_blocker_if.no_deprecation_plan", True)
+                escalate = policy.get(
+                    "breaking_change_detection.escalate_to_blocker_if.no_deprecation_plan", True
+                )
                 if breaking_changes and escalate:
-                    findings.append(Finding(
-                        rule_id="BREAK001",
-                        severity=Severity.BLOCKER,
-                        message=f"Breaking changes detected ({len(breaking_changes)}) without deprecation plan",
-                        recommendation="Create DEPRECATION_PLAN.md or revert breaking changes",
-                    ))
+                    findings.append(
+                        Finding(
+                            rule_id="BREAK001",
+                            severity=Severity.BLOCKER,
+                            message=f"Breaking changes detected ({len(breaking_changes)}) without deprecation plan",
+                            recommendation="Create DEPRECATION_PLAN.md or revert breaking changes",
+                        )
+                    )
 
                 checklist["Breaking changes accompanied by deprecation plan"] = not breaking_changes
             except OpenAPIParseError:

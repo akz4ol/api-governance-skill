@@ -1,8 +1,6 @@
 """OpenAPI spec differ for breaking change detection."""
 
-from typing import Any
-
-from .models import BreakingChange, Severity, PolicyConfig
+from .models import BreakingChange, PolicyConfig, Severity
 from .parser import OpenAPIParser
 
 
@@ -36,7 +34,9 @@ class SpecDiffer:
         """Check for removed operations."""
         changes = []
 
-        if not self.policy.get("breaking_change_detection.breaking_changes.removed_operation", True):
+        if not self.policy.get(
+            "breaking_change_detection.breaking_changes.removed_operation", True
+        ):
             return changes
 
         baseline_ops = {(p, m) for p, m, _ in baseline.get_operations()}
@@ -44,13 +44,15 @@ class SpecDiffer:
 
         removed = baseline_ops - current_ops
         for path, method in removed:
-            changes.append(BreakingChange(
-                change_type="removed_operation",
-                path=f"{method.upper()} {path}",
-                description=f"Operation removed: {method.upper()} {path}",
-                client_impact="Clients calling this endpoint will receive 404 errors",
-                severity=self._get_default_severity(),
-            ))
+            changes.append(
+                BreakingChange(
+                    change_type="removed_operation",
+                    path=f"{method.upper()} {path}",
+                    description=f"Operation removed: {method.upper()} {path}",
+                    client_impact="Clients calling this endpoint will receive 404 errors",
+                    severity=self._get_default_severity(),
+                )
+            )
 
         return changes
 
@@ -60,7 +62,9 @@ class SpecDiffer:
         """Check for removed or renamed parameters."""
         changes = []
 
-        if not self.policy.get("breaking_change_detection.breaking_changes.removed_parameter", True):
+        if not self.policy.get(
+            "breaking_change_detection.breaking_changes.removed_parameter", True
+        ):
             return changes
 
         baseline_ops = {(p, m): op for p, m, op in baseline.get_operations()}
@@ -76,13 +80,15 @@ class SpecDiffer:
 
             removed_params = set(baseline_params.keys()) - set(current_params.keys())
             for param_name in removed_params:
-                changes.append(BreakingChange(
-                    change_type="removed_parameter",
-                    path=f"{method.upper()} {path} -> {param_name}",
-                    description=f"Parameter removed: '{param_name}' from {method.upper()} {path}",
-                    client_impact="Clients sending this parameter will have it ignored or may receive errors",
-                    severity=self._get_default_severity(),
-                ))
+                changes.append(
+                    BreakingChange(
+                        change_type="removed_parameter",
+                        path=f"{method.upper()} {path} -> {param_name}",
+                        description=f"Parameter removed: '{param_name}' from {method.upper()} {path}",
+                        client_impact="Clients sending this parameter will have it ignored or may receive errors",
+                        severity=self._get_default_severity(),
+                    )
+                )
 
         return changes
 
@@ -104,16 +110,20 @@ class SpecDiffer:
             current_responses = current_op.get("responses", {})
 
             # Check for removed status codes
-            if self.policy.get("breaking_change_detection.breaking_changes.status_code_removed", True):
+            if self.policy.get(
+                "breaking_change_detection.breaking_changes.status_code_removed", True
+            ):
                 removed_codes = set(baseline_responses.keys()) - set(current_responses.keys())
                 for code in removed_codes:
-                    changes.append(BreakingChange(
-                        change_type="removed_status_code",
-                        path=f"{method.upper()} {path} -> {code}",
-                        description=f"Response status code removed: {code} from {method.upper()} {path}",
-                        client_impact="Clients handling this status code may not handle the new response correctly",
-                        severity=self._get_default_severity(),
-                    ))
+                    changes.append(
+                        BreakingChange(
+                            change_type="removed_status_code",
+                            path=f"{method.upper()} {path} -> {code}",
+                            description=f"Response status code removed: {code} from {method.upper()} {path}",
+                            client_impact="Clients handling this status code may not handle the new response correctly",
+                            severity=self._get_default_severity(),
+                        )
+                    )
 
         return changes
 
@@ -133,34 +143,42 @@ class SpecDiffer:
             current_schema = current_schemas[schema_name]
 
             # Check for removed fields
-            if self.policy.get("breaking_change_detection.breaking_changes.removed_response_field", True):
+            if self.policy.get(
+                "breaking_change_detection.breaking_changes.removed_response_field", True
+            ):
                 baseline_props = set(baseline_schema.get("properties", {}).keys())
                 current_props = set(current_schema.get("properties", {}).keys())
 
                 removed_props = baseline_props - current_props
                 for prop in removed_props:
-                    changes.append(BreakingChange(
-                        change_type="removed_field",
-                        path=f"schemas.{schema_name}.{prop}",
-                        description=f"Field removed: '{prop}' from schema '{schema_name}'",
-                        client_impact="Clients expecting this field will receive null/undefined or fail parsing",
-                        severity=self._get_default_severity(),
-                    ))
+                    changes.append(
+                        BreakingChange(
+                            change_type="removed_field",
+                            path=f"schemas.{schema_name}.{prop}",
+                            description=f"Field removed: '{prop}' from schema '{schema_name}'",
+                            client_impact="Clients expecting this field will receive null/undefined or fail parsing",
+                            severity=self._get_default_severity(),
+                        )
+                    )
 
             # Check for optional-to-required flips
-            if self.policy.get("breaking_change_detection.breaking_changes.optional_to_required_flip", True):
+            if self.policy.get(
+                "breaking_change_detection.breaking_changes.optional_to_required_flip", True
+            ):
                 baseline_required = set(baseline_schema.get("required", []))
                 current_required = set(current_schema.get("required", []))
 
                 new_required = current_required - baseline_required
                 for prop in new_required:
                     if prop in baseline_schema.get("properties", {}):
-                        changes.append(BreakingChange(
-                            change_type="optional_to_required",
-                            path=f"schemas.{schema_name}.{prop}",
-                            description=f"Field changed from optional to required: '{prop}' in '{schema_name}'",
-                            client_impact="Clients not providing this field will receive validation errors",
-                            severity=self._get_default_severity(),
-                        ))
+                        changes.append(
+                            BreakingChange(
+                                change_type="optional_to_required",
+                                path=f"schemas.{schema_name}.{prop}",
+                                description=f"Field changed from optional to required: '{prop}' in '{schema_name}'",
+                                client_impact="Clients not providing this field will receive validation errors",
+                                severity=self._get_default_severity(),
+                            )
+                        )
 
         return changes
