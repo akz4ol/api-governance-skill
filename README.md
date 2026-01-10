@@ -195,24 +195,102 @@ governance/
 
 ---
 
+## Additional Features
+
+### GitHub Actions Integration
+Add to your workflow:
+
+```yaml
+- name: API Governance Check
+  uses: akz4ol/api-governance-skill@v1
+  with:
+    spec-path: openapi.yaml
+    baseline-spec: openapi-main.yaml  # Optional: for breaking change detection
+    policy: strict
+    fail-on: blocker
+```
+
+### JSON/SARIF Output
+Generate machine-readable reports for tooling integration:
+
+```python
+from api_governor import JSONFormatter, SARIFFormatter
+
+# JSON output
+json_formatter = JSONFormatter(result)
+json_formatter.write(output_dir)  # Creates api-governor-report.json
+
+# SARIF output (for GitHub Code Scanning, VS Code, etc.)
+sarif_formatter = SARIFFormatter(result)
+sarif_formatter.write(output_dir)  # Creates api-governor-report.sarif
+```
+
+### Custom Rule Plugins
+Extend with your own governance rules:
+
+```python
+from api_governor import RulePlugin, PluginManager, Finding, Severity
+
+class MyCustomRule(RulePlugin):
+    @property
+    def rule_id(self):
+        return "CUSTOM001"
+
+    @property
+    def name(self):
+        return "My Custom Rule"
+
+    @property
+    def description(self):
+        return "Enforces my custom standard"
+
+    def check(self, spec, policy):
+        findings = []
+        # Your logic here
+        return findings
+
+# Register and use
+manager = PluginManager()
+manager.register(MyCustomRule)
+findings = manager.run_all(spec, policy)
+```
+
+Built-in plugins: `RequireDescriptionRule`, `RequireExamplesRule`, `MaxPathDepthRule`
+
+### VS Code Extension
+Real-time API governance in your IDE:
+
+```bash
+cd vscode-extension
+npm install && npm run compile
+npm run package
+code --install-extension api-governor-1.0.0.vsix
+```
+
+Features: Auto-lint on save, breaking change detection, full report generation.
+
+---
+
 ## Roadmap
 
-### Now
-- OpenAPI 3.0/3.1 support
-- Core governance rules (security, naming, pagination)
-- Breaking change detection
-- Markdown artifact generation
+### Now ✅
+- [x] OpenAPI 3.0/3.1 support
+- [x] Core governance rules (security, naming, pagination)
+- [x] Breaking change detection
+- [x] Markdown artifact generation
+- [x] GitHub Actions integration
+- [x] JSON/SARIF output formats
+- [x] Custom rule plugins
+- [x] VS Code extension
 
 ### Next
-- [ ] GitHub Actions integration
-- [ ] JSON/SARIF output formats
-- [ ] Custom rule plugins
-- [ ] VS Code extension
-
-### Later
 - [ ] AsyncAPI support
 - [ ] GraphQL schema governance
 - [ ] Multi-spec workspace analysis
+
+### Later
+- [ ] API versioning strategy enforcement
+- [ ] SDK generation validation
 
 ---
 
