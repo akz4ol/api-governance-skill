@@ -4,7 +4,6 @@ import importlib.util
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
 
 from .models import Finding, PolicyConfig, Severity
 from .parser import OpenAPIParser
@@ -236,7 +235,7 @@ class RequireExamplesRule(RulePlugin):
             # Check request body
             request_body = operation.get("requestBody", {})
             content = request_body.get("content", {})
-            for media_type, schema_data in content.items():
+            for _media_type, schema_data in content.items():
                 schema = schema_data.get("schema", {})
                 if not schema_data.get("example") and not schema.get("example"):
                     findings.append(
@@ -252,7 +251,7 @@ class RequireExamplesRule(RulePlugin):
             # Check responses
             for status_code, response in operation.get("responses", {}).items():
                 response_content = response.get("content", {})
-                for media_type, schema_data in response_content.items():
+                for _media_type, schema_data in response_content.items():
                     schema = schema_data.get("schema", {})
                     if not schema_data.get("example") and not schema.get("example"):
                         findings.append(

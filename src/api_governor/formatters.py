@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import Finding, GovernanceResult, Severity
+from .models import GovernanceResult, Severity
 
 
 class JSONFormatter:
