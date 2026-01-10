@@ -50,8 +50,10 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # No API token needed - uses trusted publishing
-        # Configure at: https://pypi.org/manage/account/publishing/
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+        # Uses API token from repository secret PYPI_API_TOKEN
+        # Get token from: https://pypi.org/manage/account/token/
 
   publish-testpypi:
     name: Publish to TestPyPI
