@@ -4,14 +4,12 @@ from pathlib import Path
 
 import yaml
 
-from api_governor.models import PolicyConfig, Severity
+from api_governor.models import PolicyConfig
 from api_governor.parser import OpenAPIParser
 from api_governor.plugins import (
     MaxPathDepthRule,
     PluginManager,
     RequireDescriptionRule,
-    RequireExamplesRule,
-    RulePlugin,
 )
 
 
