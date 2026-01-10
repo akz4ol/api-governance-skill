@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Example Internal API
+  version: "1.0.0"
+servers:
+  - url: https://internal.api.example.com
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Error:
+      type: object
+      required: [code, message, requestId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        requestId: { type: string }
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        displayName: { type: string }
+security:
+  - bearerAuth: []
+paths:
+  /users:
+    get:
+      summary: List users
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200 }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, nextCursor]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  nextCursor:
+                    type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }

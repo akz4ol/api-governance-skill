@@ -1,0 +1,98 @@
+policy_name: "Strict Public API Governance"
+policy_version: "1.0"
+
+inputs:
+  openapi_versions_allowed: ["3.1.x"]
+
+enforcement:
+  default_severity:
+    contract_validity: "BLOCKER"
+    security_missing: "BLOCKER"
+    error_model_inconsistent: "BLOCKER"
+    pagination_inconsistent: "MAJOR"
+    versioning_inconsistent: "BLOCKER"
+    naming_inconsistent: "MAJOR"
+    observability_missing: "MAJOR"
+  allow_merge_with_breaking_changes_if:
+    deprecation_plan_present: true
+
+api_style:
+  prefer_kebab_case_paths: true
+  discourage_verbs_in_paths: true
+  operation_id:
+    required: true
+    convention: "camelCase"
+  tags:
+    required: true
+
+versioning:
+  strategy: "url"
+  header_versioning:
+    enabled: false
+  url_versioning:
+    enabled: true
+    prefix: "/v{major}"
+  deprecation:
+    require_deprecated_marker: true
+    allow_undeprecated_breaking_changes: false
+
+errors:
+  require_standard_error_envelope: true
+  envelope_name: "Error"
+  problem_fields_required:
+    - code
+    - message
+    - requestId
+    - details
+  require_problem_examples: true
+  http_status_mapping_guidance: true
+
+pagination:
+  required_for_list_endpoints: true
+  style: "cursor"
+  request_params:
+    limit: "limit"
+    cursor: "cursor"
+  response_shape:
+    items: "items"
+    nextCursor: "nextCursor"
+  max_limit:
+    enabled: true
+    max: 100
+
+security:
+  require_security_by_default: true
+  allow_public_endpoints_if:
+    explicitly_marked: false
+  require_scopes_if_oauth: true
+  auth_schemes_allowed:
+    - "oauth2"
+
+reliability:
+  idempotency:
+    require_for_post_create: true
+    header_name: "Idempotency-Key"
+  retries:
+    require_retry_after_on_429: true
+
+observability:
+  require_request_id_header: true
+  header_name: "X-Request-Id"
+  require_correlation_id_header: true
+  correlation_header_name: "X-Correlation-Id"
+
+breaking_change_detection:
+  enabled: true
+  default_breaking_severity: "BLOCKER"
+  breaking_changes:
+    removed_operation: true
+    removed_parameter: true
+    removed_response_field: true
+    required_to_optional_flip: true
+    optional_to_required_flip: true
+    narrowed_enum: true
+    narrowed_numeric_range: true
+    auth_requirement_change: true
+    status_code_removed: true
+  escalate_to_blocker_if:
+    any_breaking_change: true

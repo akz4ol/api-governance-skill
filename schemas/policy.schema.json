@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/yourorg/api-governance-skill/schemas/policy.schema.json",
+  "title": "API Governance Policy",
+  "description": "Schema for API governance policy configuration files",
+  "type": "object",
+  "required": ["policy_name", "policy_version"],
+  "properties": {
+    "policy_name": {
+      "type": "string",
+      "description": "Human-readable name of the policy"
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Version of the policy"
+    },
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "openapi_versions_allowed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed OpenAPI versions (e.g., ['3.0.x', '3.1.x'])"
+        }
+      }
+    },
+    "enforcement": {
+      "type": "object",
+      "properties": {
+        "default_severity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["BLOCKER", "MAJOR", "MINOR", "INFO"]
+          }
+        },
+        "allow_merge_with_breaking_changes_if": {
+          "type": "object",
+          "properties": {
+            "deprecation_plan_present": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "api_style": {
+      "type": "object",
+      "properties": {
+        "prefer_kebab_case_paths": { "type": "boolean" },
+        "discourage_verbs_in_paths": { "type": "boolean" },
+        "operation_id": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "convention": { "type": "string", "enum": ["camelCase", "snake_case", "kebab-case"] }
+          }
+        },
+        "tags": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["none", "none_or_header", "header", "url"] },
+        "header_versioning": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "header_name": { "type": "string" }
+          }
+        },
+        "url_versioning": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "prefix": { "type": "string" }
+          }
+        },
+        "deprecation": {
+          "type": "object",
+          "properties": {
+            "require_deprecated_marker": { "type": "boolean" },
+            "allow_undeprecated_breaking_changes": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "require_standard_error_envelope": { "type": "boolean" },
+        "envelope_name": { "type": "string" },
+        "problem_fields_required": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "require_problem_examples": { "type": "boolean" },
+        "http_status_mapping_guidance": { "type": "boolean" }
+      }
+    },
+    "pagination": {
+      "type": "object",
+      "properties": {
+        "required_for_list_endpoints": { "type": "boolean" },
+        "style": { "type": "string", "enum": ["cursor", "offset", "page"] },
+        "request_params": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "response_shape": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "max_limit": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "require_security_by_default": { "type": "boolean" },
+        "allow_public_endpoints_if": {
+          "type": "object",
+          "properties": {
+            "explicitly_marked": { "type": "boolean" },
+            "marker": { "type": "string" }
+          }
+        },
+        "require_scopes_if_oauth": { "type": "boolean" },
+        "auth_schemes_allowed": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "reliability": {
+      "type": "object",
+      "properties": {
+        "idempotency": {
+          "type": "object",
+          "properties": {
+            "recommend_for_post_create": { "type": "boolean" },
+            "require_for_post_create": { "type": "boolean" },
+            "header_name": { "type": "string" }
+          }
+        },
+        "retries": {
+          "type": "object",
+          "properties": {
+            "encourage_retry_after_on_429": { "type": "boolean" },
+            "require_retry_after_on_429": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "require_request_id_header": { "type": "boolean" },
+        "header_name": { "type": "string" },
+        "encourage_correlation_id_header": { "type": "boolean" },
+        "require_correlation_id_header": { "type": "boolean" },
+        "correlation_header_name": { "type": "string" }
+      }
+    },
+    "breaking_change_detection": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "default_breaking_severity": { "type": "string", "enum": ["BLOCKER", "MAJOR"] },
+        "breaking_changes": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        },
+        "escalate_to_blocker_if": {
+          "type": "object",
+          "properties": {
+            "no_deprecation_plan": { "type": "boolean" },
+            "any_breaking_change": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

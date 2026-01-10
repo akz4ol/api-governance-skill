@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Example Internal API
+  version: "2.0.0"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Error:
+      type: object
+      required: [code, message, requestId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        requestId: { type: string }
+    User:
+      type: object
+      required: [id] # BREAKING: email removed from required + field removed
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+security:
+  - bearerAuth: []
+paths:
+  /users:
+    get:
+      summary: List users
+      parameters:
+        - in: query
+          name: pageSize   # BREAKING vs policy: changed param name
+          schema: { type: integer, minimum: 1, maximum: 200 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]   # BREAKING: response shape changed
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
