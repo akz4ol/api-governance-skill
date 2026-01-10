@@ -129,9 +129,7 @@ class SARIFFormatter:
                     "id": finding.rule_id,
                     "name": finding.rule_id.replace("_", " ").title(),
                     "shortDescription": {"text": finding.message[:100]},
-                    "defaultConfiguration": {
-                        "level": self._severity_to_level(finding.severity)
-                    },
+                    "defaultConfiguration": {"level": self._severity_to_level(finding.severity)},
                     "properties": {
                         "tags": ["api", "governance"],
                     },
@@ -240,9 +238,7 @@ class SARIFFormatter:
         return path
 
 
-def format_result(
-    result: GovernanceResult, output_format: str, output_dir: Path
-) -> Path:
+def format_result(result: GovernanceResult, output_format: str, output_dir: Path) -> Path:
     """Format and write result in specified format.
 
     Args:

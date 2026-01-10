@@ -41,7 +41,7 @@ class TestPluginManager:
 
     def test_load_from_file(self, tmp_path: Path) -> None:
         """Test loading plugins from file."""
-        plugin_code = '''
+        plugin_code = """
 from api_governor.plugins import RulePlugin
 from api_governor.models import Finding, Severity
 
@@ -60,7 +60,7 @@ class CustomTestRule(RulePlugin):
 
     def check(self, spec, policy):
         return []
-'''
+"""
         plugin_file = tmp_path / "test_plugin.py"
         plugin_file.write_text(plugin_code)
 
@@ -79,13 +79,7 @@ class TestRequireDescriptionRule:
         spec_content = {
             "openapi": "3.0.0",
             "info": {"title": "Test", "version": "1.0"},
-            "paths": {
-                "/users": {
-                    "get": {
-                        "responses": {"200": {"description": "OK"}}
-                    }
-                }
-            },
+            "paths": {"/users": {"get": {"responses": {"200": {"description": "OK"}}}}},
         }
 
         spec_file = tmp_path / "spec.yaml"
@@ -137,11 +131,7 @@ class TestMaxPathDepthRule:
         spec_content = {
             "openapi": "3.0.0",
             "info": {"title": "Test", "version": "1.0"},
-            "paths": {
-                "/a/b/c/d/e/f/g": {
-                    "get": {"responses": {"200": {"description": "OK"}}}
-                }
-            },
+            "paths": {"/a/b/c/d/e/f/g": {"get": {"responses": {"200": {"description": "OK"}}}}},
         }
 
         spec_file = tmp_path / "spec.yaml"
@@ -162,11 +152,7 @@ class TestMaxPathDepthRule:
         spec_content = {
             "openapi": "3.0.0",
             "info": {"title": "Test", "version": "1.0"},
-            "paths": {
-                "/users/{id}": {
-                    "get": {"responses": {"200": {"description": "OK"}}}
-                }
-            },
+            "paths": {"/users/{id}": {"get": {"responses": {"200": {"description": "OK"}}}}},
         }
 
         spec_file = tmp_path / "spec.yaml"

@@ -36,9 +36,7 @@ class RulePlugin(ABC):
         return Severity.MINOR
 
     @abstractmethod
-    def check(
-        self, spec: OpenAPIParser, policy: PolicyConfig
-    ) -> list[Finding]:
+    def check(self, spec: OpenAPIParser, policy: PolicyConfig) -> list[Finding]:
         """Run the rule check on the spec.
 
         Args:
@@ -90,11 +88,7 @@ class PluginManager:
         # Find all RulePlugin subclasses in module
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
-            if (
-                isinstance(attr, type)
-                and issubclass(attr, RulePlugin)
-                and attr is not RulePlugin
-            ):
+            if isinstance(attr, type) and issubclass(attr, RulePlugin) and attr is not RulePlugin:
                 self.register(attr)
 
     def load_from_directory(self, plugin_dir: str | Path) -> None:
@@ -115,9 +109,7 @@ class PluginManager:
             except Exception as e:
                 print(f"Warning: Failed to load plugin {plugin_file}: {e}")
 
-    def run_all(
-        self, spec: OpenAPIParser, policy: PolicyConfig
-    ) -> list[Finding]:
+    def run_all(self, spec: OpenAPIParser, policy: PolicyConfig) -> list[Finding]:
         """Run all registered plugins.
 
         Args:
@@ -187,9 +179,7 @@ class RequireDescriptionRule(RulePlugin):
     def default_severity(self) -> Severity:
         return Severity.MINOR
 
-    def check(
-        self, spec: OpenAPIParser, policy: PolicyConfig
-    ) -> list[Finding]:
+    def check(self, spec: OpenAPIParser, policy: PolicyConfig) -> list[Finding]:
         findings: list[Finding] = []
 
         for path, method, operation in spec.get_operations():
@@ -226,9 +216,7 @@ class RequireExamplesRule(RulePlugin):
     def default_severity(self) -> Severity:
         return Severity.INFO
 
-    def check(
-        self, spec: OpenAPIParser, policy: PolicyConfig
-    ) -> list[Finding]:
+    def check(self, spec: OpenAPIParser, policy: PolicyConfig) -> list[Finding]:
         findings: list[Finding] = []
 
         for path, method, operation in spec.get_operations():
@@ -286,9 +274,7 @@ class MaxPathDepthRule(RulePlugin):
     def default_severity(self) -> Severity:
         return Severity.MINOR
 
-    def check(
-        self, spec: OpenAPIParser, policy: PolicyConfig
-    ) -> list[Finding]:
+    def check(self, spec: OpenAPIParser, policy: PolicyConfig) -> list[Finding]:
         findings: list[Finding] = []
         max_depth = policy.get("custom_rules.max_path_depth", 5)
 
