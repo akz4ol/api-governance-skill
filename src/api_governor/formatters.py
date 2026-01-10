@@ -250,10 +250,8 @@ def format_result(result: GovernanceResult, output_format: str, output_dir: Path
         Path to generated file
     """
     if output_format == "json":
-        formatter = JSONFormatter(result)
-        return formatter.write(output_dir)
+        return JSONFormatter(result).write(output_dir)
     elif output_format == "sarif":
-        formatter = SARIFFormatter(result)
-        return formatter.write(output_dir)
+        return SARIFFormatter(result).write(output_dir)
     else:
         raise ValueError(f"Unknown format: {output_format}")
