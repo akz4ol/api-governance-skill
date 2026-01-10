@@ -26,6 +26,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Start Here: START_HERE.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
@@ -36,6 +37,9 @@ nav:
   - Reference:
     - Rule IDs: reference/rules.md
     - Policy Schema: reference/policy-schema.md
+  - Architecture: ARCHITECTURE.md
+  - Design Decisions: DECISIONS.md
+  - FAQ: FAQ.md
   - Contributing: contributing.md
 
 markdown_extensions:
