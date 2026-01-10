@@ -50,11 +50,11 @@ dev = [
 api-governor = "api_governor.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/yourorg/api-governance-skill"
-Documentation = "https://github.com/yourorg/api-governance-skill#readme"
-Repository = "https://github.com/yourorg/api-governance-skill"
-Issues = "https://github.com/yourorg/api-governance-skill/issues"
-Changelog = "https://github.com/yourorg/api-governance-skill/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/akz4ol/api-governance-skill"
+Documentation = "https://github.com/akz4ol/api-governance-skill#readme"
+Repository = "https://github.com/akz4ol/api-governance-skill"
+Issues = "https://github.com/akz4ol/api-governance-skill/issues"
+Changelog = "https://github.com/akz4ol/api-governance-skill/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.sdist]
 include = [

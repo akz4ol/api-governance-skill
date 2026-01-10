@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/yourorg/api-governance-skill/schemas/policy.schema.json",
+  "$id": "https://github.com/akz4ol/api-governance-skill/schemas/policy.schema.json",
   "title": "API Governance Policy",
   "description": "Schema for API governance policy configuration files",
   "type": "object",

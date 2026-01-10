@@ -1,6 +1,6 @@
 # API Governance Skill
 
-[![CI](https://github.com/yourorg/api-governance-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/yourorg/api-governance-skill/actions/workflows/ci.yml)
+[![CI](https://github.com/akz4ol/api-governance-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/akz4ol/api-governance-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -22,7 +22,7 @@ Lints OpenAPI specs against configurable governance policies, detects breaking c
 pip install api-governor
 
 # From source
-git clone https://github.com/yourorg/api-governance-skill.git
+git clone https://github.com/akz4ol/api-governance-skill.git
 cd api-governance-skill
 pip install -e ".[dev]"
 ```

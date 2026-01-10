@@ -1,0 +1,46 @@
+site_name: API Governor
+site_description: API governance and breaking change detection for OpenAPI specs
+site_url: https://akz4ol.github.io/api-governance-skill
+repo_url: https://github.com/akz4ol/api-governance-skill
+repo_name: akz4ol/api-governance-skill
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+  - User Guide:
+    - CLI Reference: guide/cli.md
+    - Python API: guide/python-api.md
+    - Policies: guide/policies.md
+  - Reference:
+    - Rule IDs: reference/rules.md
+    - Policy Schema: reference/policy-schema.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - admonition
+  - tables
