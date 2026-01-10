@@ -3,6 +3,7 @@
 __version__ = "1.0.0"
 
 from .diff import SpecDiffer
+from .formatters import JSONFormatter, SARIFFormatter, format_result
 from .governor import APIGovernor
 from .models import (
     BreakingChange,
@@ -12,6 +13,7 @@ from .models import (
     Severity,
 )
 from .parser import OpenAPIParser
+from .plugins import PluginManager, RulePlugin, default_manager
 from .rules import RuleEngine
 
 __all__ = [
@@ -24,4 +26,10 @@ __all__ = [
     "OpenAPIParser",
     "RuleEngine",
     "SpecDiffer",
+    "JSONFormatter",
+    "SARIFFormatter",
+    "format_result",
+    "RulePlugin",
+    "PluginManager",
+    "default_manager",
 ]

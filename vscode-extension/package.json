@@ -1,0 +1,105 @@
+{
+  "name": "api-governor",
+  "displayName": "API Governor",
+  "description": "Automated API governance - Lint, diff, and enforce standards on OpenAPI specs",
+  "version": "1.0.0",
+  "publisher": "api-governor",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "openapi",
+    "swagger",
+    "api",
+    "linter",
+    "governance"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onLanguage:json",
+    "workspaceContains:**/openapi.yaml",
+    "workspaceContains:**/openapi.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "api-governor.lint",
+        "title": "API Governor: Lint Current File"
+      },
+      {
+        "command": "api-governor.diff",
+        "title": "API Governor: Compare with Baseline"
+      },
+      {
+        "command": "api-governor.generateReport",
+        "title": "API Governor: Generate Full Report"
+      }
+    ],
+    "configuration": {
+      "title": "API Governor",
+      "properties": {
+        "api-governor.policy": {
+          "type": "string",
+          "default": "standard",
+          "enum": ["strict", "standard", "relaxed", "custom"],
+          "description": "Governance policy preset"
+        },
+        "api-governor.customPolicyPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to custom policy file (when policy is 'custom')"
+        },
+        "api-governor.baselineSpec": {
+          "type": "string",
+          "default": "",
+          "description": "Path to baseline spec for breaking change detection"
+        },
+        "api-governor.autoLint": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically lint OpenAPI files on save"
+        },
+        "api-governor.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python interpreter"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "openapi",
+        "aliases": ["OpenAPI", "openapi"],
+        "extensions": [".openapi.yaml", ".openapi.json"],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akz4ol/api-governance-skill"
+  },
+  "license": "MIT"
+}

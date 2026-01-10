@@ -1,0 +1,199 @@
+name: 'API Governor'
+description: 'Automated API governance - Lint, diff, and enforce standards on OpenAPI specs'
+author: 'API Governor Contributors'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  spec-path:
+    description: 'Path to OpenAPI spec file'
+    required: true
+  baseline-spec:
+    description: 'Path to baseline spec for breaking change detection'
+    required: false
+  policy:
+    description: 'Policy preset (strict, standard, relaxed) or path to custom policy'
+    required: false
+    default: 'standard'
+  fail-on:
+    description: 'Severity level to fail on (blocker, major, minor, info)'
+    required: false
+    default: 'blocker'
+  output-format:
+    description: 'Output format (markdown, json, sarif)'
+    required: false
+    default: 'markdown'
+  output-dir:
+    description: 'Directory for output artifacts'
+    required: false
+    default: '.api-governor'
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  status:
+    description: 'Result status (PASS, WARN, FAIL)'
+    value: ${{ steps.govern.outputs.status }}
+  findings-count:
+    description: 'Total number of findings'
+    value: ${{ steps.govern.outputs.findings-count }}
+  breaking-changes-count:
+    description: 'Number of breaking changes detected'
+    value: ${{ steps.govern.outputs.breaking-changes-count }}
+  report-path:
+    description: 'Path to generated report'
+    value: ${{ steps.govern.outputs.report-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install API Governor
+      shell: bash
+      run: |
+        pip install api-governor
+
+    - name: Run API Governor
+      id: govern
+      shell: bash
+      env:
+        SPEC_PATH: ${{ inputs.spec-path }}
+        BASELINE_SPEC: ${{ inputs.baseline-spec }}
+        POLICY: ${{ inputs.policy }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        OUTPUT_FORMAT: ${{ inputs.output-format }}
+        OUTPUT_DIR: ${{ inputs.output-dir }}
+      run: |
+        # Build command
+        CMD="api-governor \"$SPEC_PATH\""
+
+        if [ -n "$BASELINE_SPEC" ]; then
+          CMD="$CMD --baseline \"$BASELINE_SPEC\""
+        fi
+
+        if [ -n "$POLICY" ]; then
+          CMD="$CMD --policy \"$POLICY\""
+        fi
+
+        CMD="$CMD --output-format \"$OUTPUT_FORMAT\" --output-dir \"$OUTPUT_DIR\""
+
+        # Run and capture output
+        set +e
+        OUTPUT=$(eval $CMD 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        echo "$OUTPUT"
+
+        # Parse results
+        if echo "$OUTPUT" | grep -q "PASS"; then
+          echo "status=PASS" >> $GITHUB_OUTPUT
+        elif echo "$OUTPUT" | grep -q "WARN"; then
+          echo "status=WARN" >> $GITHUB_OUTPUT
+        else
+          echo "status=FAIL" >> $GITHUB_OUTPUT
+        fi
+
+        # Count findings
+        FINDINGS=$(echo "$OUTPUT" | grep -c "Finding:" || echo "0")
+        echo "findings-count=$FINDINGS" >> $GITHUB_OUTPUT
+
+        # Count breaking changes
+        BREAKING=$(echo "$OUTPUT" | grep -c "Breaking:" || echo "0")
+        echo "breaking-changes-count=$BREAKING" >> $GITHUB_OUTPUT
+
+        # Report path
+        echo "report-path=$OUTPUT_DIR/API_REVIEW.md" >> $GITHUB_OUTPUT
+
+        # Fail if needed
+        case "$FAIL_ON" in
+          blocker)
+            if echo "$OUTPUT" | grep -q "BLOCKER"; then
+              exit 1
+            fi
+            ;;
+          major)
+            if echo "$OUTPUT" | grep -qE "BLOCKER|MAJOR"; then
+              exit 1
+            fi
+            ;;
+          minor)
+            if echo "$OUTPUT" | grep -qE "BLOCKER|MAJOR|MINOR"; then
+              exit 1
+            fi
+            ;;
+          info)
+            if [ $EXIT_CODE -ne 0 ]; then
+              exit 1
+            fi
+            ;;
+        esac
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: api-governor-report
+        path: ${{ inputs.output-dir }}
+        retention-days: 30
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const reportPath = '${{ inputs.output-dir }}/API_REVIEW.md';
+
+          if (!fs.existsSync(reportPath)) {
+            console.log('No report found');
+            return;
+          }
+
+          const report = fs.readFileSync(reportPath, 'utf8');
+          const status = '${{ steps.govern.outputs.status }}';
+          const emoji = status === 'PASS' ? '✅' : status === 'WARN' ? '⚠️' : '❌';
+
+          const body = `## ${emoji} API Governor Report
+
+          <details>
+          <summary>Click to expand full report</summary>
+
+          ${report}
+
+          </details>`;
+
+          // Find existing comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const botComment = comments.find(c =>
+            c.user.type === 'Bot' && c.body.includes('API Governor Report')
+          );
+
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+          }
