@@ -115,6 +115,42 @@ docker build -t api-governor .
 docker run --rm -v $(pwd):/specs api-governor /specs/openapi.yaml
 ```
 
+### LangChain Integration
+
+```python
+from langchain_community.tools import APIGovernorTool
+
+tool = APIGovernorTool()
+result = tool.invoke({
+    "spec_content": "openapi: 3.0.0\ninfo:\n  title: My API\n...",
+    "policy": "strict",
+    "output_format": "markdown"
+})
+```
+
+### CrewAI Integration
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import APIGovernorTool
+
+tool = APIGovernorTool()
+
+api_reviewer = Agent(
+    role="API Reviewer",
+    goal="Validate API specifications against governance policies",
+    tools=[tool]
+)
+
+task = Task(
+    description="Review the OpenAPI spec for security and compliance issues",
+    agent=api_reviewer
+)
+
+crew = Crew(agents=[api_reviewer], tasks=[task])
+result = crew.kickoff()
+```
+
 ---
 
 ## Real-World Use Cases
