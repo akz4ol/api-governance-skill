@@ -43,7 +43,7 @@ jobs:
       url: https://pypi.org/p/api-governor
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: python-package-distributions
           path: dist/
@@ -65,7 +65,7 @@ jobs:
       url: https://test.pypi.org/p/api-governor
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: python-package-distributions
           path: dist/
